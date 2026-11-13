@@ -86,6 +86,39 @@ bytes here against 6090 on the QD4/B9 images, so the QD4/B9 `intelsetup.bin`
 must not be reused, and any board-side setup offsets have to be re-derived from
 this image rather than copied.
 
+### What the image asks of the firmware
+
+Derived from the disassembly of this dump (IDA, image base `0xffe0f3d0`):
+
+* `IntelSetup` is read through the PEI read-only variable PPI with a declared
+  buffer of **6212 bytes** at all five call sites (`0xffea1e2e`, `0xffea02d5`,
+  `0xffea04ac`, `0xffea0aae`, `0xffe3223f`); the payload stored here is 6211
+  bytes, i.e. the struct plus the trailing zero the variable drops. Serving the
+  stored size is what the module expects, so the runner needs no change.
+* The trained-configuration export is published as GUID
+  `1de25879-6e2a-4d72-a768-288ccb9fa719` (`0xffe0f640`) in **136219 bytes**,
+  written as `0xF000`-byte chunks with a shorter tail (`0xffea3442`). That is
+  byte-for-byte the same contract the QD4 and B9 images use, so `RW_MRC_CACHE`
+  handling carries over unchanged. The source sits at host offset 141732
+  (`0x229a4`) instead of the 141632 used by the other two builds; the offset is
+  internal to the module and does not affect the firmware side.
+
+### Serial debug output
+
+`IntelSetup` offset **0x2ee** is `Serial Debug Message Level`, and it is part of
+the 6212-byte `IntelSetup` varstore the setup forms bind to (varstore 1 in that
+formset; the question sits at `0x1ca4f8` with prompt/help string ids 5066/5067
+and options 0 `Disable`, 1 `Minimum`, 2 `Normal`, 3 `Maximum`, default
+`Disable`). On this image the byte reads 1, i.e. the board was left at
+`Minimum`.
+
+That offset is only the setup field, not an output path: this dump is still a
+release build, with all 858 `DebugPrint` call sites resolving to a one-byte
+`ret` at `0xffe52e6d` and no UART port I/O in the image. Setting the level
+therefore records the setting the vendor code would consult, but no vendor
+messages appear on COM1 from this blob - which is also why the QD4/B9 captures
+show none despite the B9 entry setting `0x2d6`.
+
 ## Logs
 
 `logs/` holds the runtime capture this material is based on: `acpidump.log`,
