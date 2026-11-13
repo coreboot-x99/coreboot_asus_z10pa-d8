@@ -122,9 +122,15 @@ show none despite the B9 entry setting `0x2d6`.
 ## Logs
 
 `logs/` holds the runtime capture this material is based on: `acpidump.log`,
-`cpuinfo.log`, `dmidecode.log`, `ectool.log`, `input_bustypes.log`,
-`inteltool.log`, `ioports.log`, `lspci.log` (with config space dumps),
-`superiotool.log`.
+`cpuinfo.log`, `dmesg.log`, `dmidecode.log`, `ectool.log`,
+`input_bustypes.log`, `inteltool.log`, `ioports.log`, `lspci.log` (with config
+space dumps), `superiotool.log`.
+
+`dmesg.log` is a boot of the stock firmware (BIOS 3801, kernel 7.2.15) with
+4 of 8 DIMM slots populated: 64 GiB in a single NUMA node, three IOAPICs, and
+two DMAR units - `0xfbffc000` (flags 0) and `0xc7ffc000` (flags 1). The port
+publishes `0xfbffc000`, the base the other X99 boards use; the second unit from
+stock is not reproduced yet.
 
 ## Autoport
 
