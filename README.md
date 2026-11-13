@@ -1,16 +1,21 @@
 # ASUS Z10PA-D8 — coreboot port material
 
-Board data collected from a stock ASUS Z10PA-D8 Series (dual LGA2011-3, Xeon
-E5 v3, C610/Wellsburg PCH) to support a native coreboot port: autoport output,
-a full set of runtime logs, and the vendor blobs the Grantley DRAM init needs.
+Board data collected from a stock ASUS Z10PA-D8 Series (dual LGA2011-3 for
+Xeon E5-2600 v3/v4, C612/Wellsburg PCH) to support a native coreboot port:
+autoport output, a full set of runtime logs, and the vendor blobs the Grantley
+DRAM init needs.
+
+CPU count and DIMM fill are properties of the machine, not of the board: the
+board takes one or two LGA2011-3 CPUs and any valid DDR4 RDIMM/LRDIMM fill, so
+nothing here assumes the configuration the capture happened to have.
 
 ## Board
 
 | | |
 |---|---|
 | Vendor / board | ASUSTeK Z10PA-D8 Series, Rev 1.xx |
-| CPU | 2 × Xeon E5-2673 v3 (Haswell-EP, 12C/24T each, 48 threads), model 63 |
-| Memory | 2 × 16 GiB DDR4-2133 ECC RDIMM (`DIMM_A1`, `NODE 1`) |
+| Sockets | 2 × LGA2011-3, Xeon E5-2600 v3/v4, model `0x3f`/`0x4f` |
+| Memory | 8 DIMM slots, DDR4 RDIMM/LRDIMM; the capture had 4 populated |
 | Northbridge | Grantley, `8086:2f00` DMI2; IIO root ports `2f02` (01.0), `2f04` (02.0), `2f08` (03.0) |
 | Southbridge | Intel C612 (Wellsburg), LPC `8086:8d44` (lspci names the family "C610/X99 series") |
 | Storage | 6-port AHCI SATA `8086:8d02` (1f.2) + sSATA AHCI `8086:8d62` (11.4) |
@@ -20,10 +25,10 @@ a full set of runtime logs, and the vendor blobs the Grantley DRAM init needs.
 
 The board is a server board in the strict sense: server CPU/IMC pair with the
 Wellsburg PCH, both storage complexes present (SATA and sSATA), SPSR function
-`8086:8d7c` on 11.0 and no client-style LPC device. **Two sockets are
-populated**, so a port has to initialize remote-socket memory as well; the
-Grantley runner in this tree has so far only been validated on single-socket
-boards.
+`8086:8d7c` on 11.0 and no client-style LPC device. **Both sockets were
+populated in the capture**, so the port must initialize remote-socket memory as
+well; the Grantley runner in this tree has so far only been validated on
+single-socket boards.
 
 IIO link capabilities reported by stock:
 
@@ -126,11 +131,14 @@ show none despite the B9 entry setting `0x2d6`.
 `input_bustypes.log`, `inteltool.log`, `ioports.log`, `lspci.log` (with config
 space dumps), `superiotool.log`.
 
-`dmesg.log` is a boot of the stock firmware (BIOS 3801, kernel 7.2.15) with
-4 of 8 DIMM slots populated: 64 GiB in a single NUMA node, three IOAPICs, and
-two DMAR units - `0xfbffc000` (flags 0) and `0xc7ffc000` (flags 1). The port
-publishes `0xfbffc000`, the base the other X99 boards use; the second unit from
-stock is not reproduced yet.
+`dmesg.log` is a boot of the stock firmware (BIOS 3801, kernel 7.2.15). Its
+CPU count, DIMM fill and the resulting NUMA/IOAPIC/DMAR layout are that
+machine's configuration, not board properties - the log is there for the
+firmware behaviour (DRHD placement, GSI routing, ACPI tables), not as a
+specification of what a port must expect. In that boot the firmware published
+two DMAR units, `0xfbffc000` (flags 0) and `0xc7ffc000` (flags 1); the port
+publishes `0xfbffc000`, the base the other X99 boards use, and does not
+reproduce the second unit yet.
 
 ## Autoport
 
