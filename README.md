@@ -12,9 +12,9 @@ a full set of runtime logs, and the vendor blobs the Grantley DRAM init needs.
 | CPU | 2 × Xeon E5-2673 v3 (Haswell-EP, 12C/24T each, 48 threads), model 63 |
 | Memory | 2 × 16 GiB DDR4-2133 ECC RDIMM (`DIMM_A1`, `NODE 1`) |
 | Northbridge | Grantley, `8086:2f00` DMI2; IIO root ports `2f02` (01.0), `2f04` (02.0), `2f08` (03.0) |
-| Southbridge | Intel C610 (Wellsburg), LPC `8086:8d44` |
+| Southbridge | Intel C612 (Wellsburg), LPC `8086:8d44` (lspci names the family "C610/X99 series") |
 | Storage | 6-port AHCI SATA `8086:8d02` (1f.2) + sSATA AHCI `8086:8d62` (11.4) |
-| Super I/O | Nuvoton NCT6779D at `0x2e` (id `0xc562`) |
+| Super I/O | Nuvoton NCT6779D at `0x2e` (id `0xc562`), GPIO base `0x500`, PM base `0x400` |
 | BIOS | `3801`, release date 08/23/2019 |
 | Flash | 16 MiB SPI |
 
@@ -103,8 +103,8 @@ corrected by hand in a port:
 * the root-port slot comments are autoport's guesses, not the widths in the
   `LnkCap` table above;
 * the PCH blocks describe a Lynx Point client function set; Wellsburg's sSATA
-  complex (11.4) and SPSR (11.0) are present on this board, and 11.0 must stay
-  hidden the way stock leaves it.
+  complex (11.4) and SPSR function (11.0) are both present and both visible on
+  stock, so a port must not take the second storage complex off the bus.
 
 ## SHA256SUMS
 
